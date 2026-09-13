@@ -19,11 +19,19 @@ const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&l
 // **強調** だけ Markdown を活かす
 const md = (s) => esc(s).replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
 const setTitle = (id) => DATA.sets.find((s) => s.id === id)?.title ?? '';
+// 連続正解数。null は未挑戦。2回連続で正解したら苦手から卒業。
+const GRADUATE = 2;
+function streakOf(id) {
+  const r = progress[id];
+  if (!r) return null;
+  return r.streak ?? (r.last === 'ok' ? 1 : 0); // streak を持たない旧データからの移行
+}
+const isWeak = (q) => { const s = streakOf(q.id); return s !== null && s < GRADUATE; };
 const shuffle = (a) => { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
 
 const SCOPES = [
   { key: 'all', label: 'すべて', test: () => true },
-  { key: 'wrong', label: '苦手', test: (q) => progress[q.id]?.last === 'ng' },
+  { key: 'wrong', label: '苦手', test: isWeak },
   { key: 'fresh', label: '未挑戦', test: (q) => !progress[q.id] },
   { key: 'sign', label: '標識', test: (q) => !!q.image },
 ];
@@ -36,7 +44,7 @@ function pool(f = filter) {
 /* ---------------- ホーム ---------------- */
 function renderHome() {
   const total = DATA.questions.length;
-  const weak = DATA.questions.filter((q) => progress[q.id]?.last === 'ng').length;
+  const weak = DATA.questions.filter(isWeak).length;
   const done = DATA.questions.filter((q) => progress[q.id]).length;
   const list = pool();
 
@@ -46,7 +54,7 @@ function renderHome() {
     <div class="stats">
       <div class="stat"><b>${total}</b><span>収録問題</span></div>
       <div class="stat"><b>${done}</b><span>挑戦済み</span></div>
-      <div class="stat"><b>${weak}</b><span>直近ミス</span></div>
+      <div class="stat"><b>${weak}</b><span>苦手</span></div>
     </div>
     <h2>出題範囲</h2>
     <div class="chips" id="scopes">
@@ -119,6 +127,7 @@ function answer(choice) {
   quiz.log.push({ q, ok });
 
   const rec = progress[q.id] ?? { ok: 0, ng: 0 };
+  rec.streak = ok ? (streakOf(q.id) ?? 0) + 1 : 0;
   rec[ok ? 'ok' : 'ng']++;
   rec.last = ok ? 'ok' : 'ng';
   progress[q.id] = rec;
@@ -134,10 +143,16 @@ function showFeedback() {
     if ((b.dataset.v === '1') === quiz.answered) b.classList.add('chosen');
   });
   const last = quiz.i === quiz.items.length - 1;
+  const streak = streakOf(q.id) ?? 0;
+  const note = !ok ? '苦手に入れた'
+    : streak >= GRADUATE ? `${GRADUATE}回連続で正解。苦手から卒業`
+    : GRADUATE - streak === 1 ? 'あと1回正解すると苦手から卒業'
+    : `あと${GRADUATE - streak}回連続で正解すると苦手から卒業`;
   app.querySelector('#feedback').innerHTML = `
     <div class="result ${ok ? 'ok' : 'ng'}">
       <div class="verdict">${ok ? '正解' : '不正解'} ｜ 答えは ${q.answer ? '○' : '×'}</div>
       ${q.point ? `<div class="point">${md(q.point)}</div>` : ''}
+      <div class="note">${note}</div>
     </div>
     <button class="next" id="next">${last ? '結果を見る' : '次の問題へ'}</button>
   `;

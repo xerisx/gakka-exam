@@ -107,6 +107,8 @@ button { font: inherit; cursor: pointer; }
 .result.ng .verdict { color: var(--ng); }
 .point { font-size: .92rem; }
 .point strong { background: rgba(127,127,127,.18); padding: 0 3px; border-radius: 3px; }
+.note { margin-top: 10px; font-size: .75rem; color: var(--muted); }
+.review .note { display: none; }
 .next {
   width: 100%; padding: 15px; border: 0; border-radius: var(--radius);
   background: var(--fg); color: var(--bg); font-size: 1rem; font-weight: 700;
