@@ -9,13 +9,14 @@
 ```
 mistakes.md   ← 誤答ノート（唯一の入力。手で書く／Claude Code が追記する）
 images/       ← 標識などの画像
-web/          ← サイト本体（HTML / CSS / JS）
-scripts/build.mjs  ← mistakes.md をパースして _site/ を生成
+web/          ← サイト本体のソース（HTML / CSS / JS）
+scripts/build.mjs  ← mistakes.md をパースして docs/ を生成
+docs/         ← 生成物。GitHub Pages はこのフォルダを配信する（コミット対象）
 ```
 
-`main` に push すると GitHub Actions が `scripts/build.mjs` を実行し、
-`_site/`（web/ + images/ + 生成した questions.json）を Pages に配信する。
-**問題を増やすときは `mistakes.md` に追記して push するだけ。**
+**問題を増やすときは `mistakes.md` に追記してコミットするだけ。**
+`.githooks/pre-commit` がコミットのたびに `docs/` を作り直して stage する
+（クローン直後は `git config core.hooksPath .githooks` を一度実行する）。
 
 ## mistakes.md の書式
 
@@ -44,7 +45,7 @@ scripts/build.mjs  ← mistakes.md をパースして _site/ を生成
 
 ```sh
 node scripts/build.mjs
-npx serve _site      # または: cd _site && python3 -m http.server 8000
+cd docs && python3 -m http.server 8000   # → http://localhost:8000
 ```
 
 ## 機能

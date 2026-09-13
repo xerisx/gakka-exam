@@ -5,7 +5,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const OUT = path.join(root, '_site');
+const OUT = path.join(root, 'docs');
 
 const FIELD = /^-\s+\*\*(.+?)\*\*\s*[:：]\s*(.*)$/;
 const SET_HEAD = /^##\s+(?:(\d{4}-\d{2}-\d{2})\s+)?(.+?)\s*$/;
@@ -112,5 +112,5 @@ fs.writeFileSync(
 );
 
 const withImage = questions.filter((q) => q.image).length;
-console.log(`✅ ${questions.length}問 (画像 ${withImage}問) / ${sets.length}セット → _site/`);
+console.log(`✅ ${questions.length}問 (画像 ${withImage}問) / ${sets.length}セット → docs/`);
 for (const w of warnings) console.warn(`⚠️  ${w}`);

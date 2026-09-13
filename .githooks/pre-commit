@@ -1,0 +1,4 @@
+#!/bin/sh
+# mistakes.md や web/ を変更したまま docs/ を作り直し忘れないようにする
+node scripts/build.mjs || exit 1
+git add docs
