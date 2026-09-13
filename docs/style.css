@@ -99,6 +99,7 @@ button { font: inherit; cursor: pointer; }
 .ans.chosen.pick-o { background: var(--ok-bg); }
 .ans.chosen.pick-x { background: var(--ng-bg); }
 
+#feedback:not(:empty) { margin-top: 20px; }
 .result { border-radius: var(--radius); padding: 16px; margin-bottom: 16px; border: 1px solid; }
 .result.ok { background: var(--ok-bg); border-color: var(--ok); }
 .result.ng { background: var(--ng-bg); border-color: var(--ng); }
