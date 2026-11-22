@@ -26,7 +26,9 @@ function streakOf(id) {
   if (!r) return null;
   return r.streak ?? (r.last === 'ok' ? 1 : 0); // streak を持たない旧データからの移行
 }
-const isWeak = (q) => { const s = streakOf(q.id); return s !== null && s < GRADUATE; };
+// 苦手 = 一度でも間違えたことがあり、その後まだ2回連続で正解していない問題。
+// 初挑戦から正解し続けている問題は苦手に入れない。
+const isWeak = (q) => (progress[q.id]?.ng ?? 0) > 0 && streakOf(q.id) < GRADUATE;
 const shuffle = (a) => { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
 
 const SCOPES = [
@@ -145,6 +147,7 @@ function showFeedback() {
   const last = quiz.i === quiz.items.length - 1;
   const streak = streakOf(q.id) ?? 0;
   const note = !ok ? '苦手に入れた'
+    : !progress[q.id]?.ng ? ''
     : streak >= GRADUATE ? `${GRADUATE}回連続で正解。苦手から卒業`
     : GRADUATE - streak === 1 ? 'あと1回正解すると苦手から卒業'
     : `あと${GRADUATE - streak}回連続で正解すると苦手から卒業`;
@@ -152,7 +155,7 @@ function showFeedback() {
     <div class="result ${ok ? 'ok' : 'ng'}">
       <div class="verdict">${ok ? '正解' : '不正解'} ｜ 答えは ${q.answer ? '○' : '×'}</div>
       ${q.point ? `<div class="point">${md(q.point)}</div>` : ''}
-      <div class="note">${note}</div>
+      ${note ? `<div class="note">${note}</div>` : ''}
     </div>
     <button class="next" id="next">${last ? '結果を見る' : '次の問題へ'}</button>
   `;

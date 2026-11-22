@@ -125,6 +125,12 @@ for (const q of questions) {
   const src = path.join(root, q.image);
   const dst = path.join(OUT, q.image);
   try {
+    // images/figures/ は図だけに切り抜き済みの画像。答えは写っていないのでそのまま配信する。
+    if (q.image.startsWith('images/figures/')) {
+      fs.mkdirSync(path.dirname(dst), { recursive: true });
+      fs.copyFileSync(src, dst);
+      continue;
+    }
     const img = decode(fs.readFileSync(src));
     const fig = detectFigure(img);
     const w = fig ? fig.right - fig.left : 0;
